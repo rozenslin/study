@@ -1,4 +1,5 @@
 package shape
+import "fmt"
 import "math"
 
 type Shape interface {
@@ -20,8 +21,12 @@ type Circle struct {
 }
 
 func NewCircle(r float64) *Circle {
-    c := Circle{r: r}
+    c := Circle{r:  r, string:  "a lonely circle"}
     return &c
+}
+
+func (c Circle) String() string {
+    return fmt.Sprintf("%s", c.string)
 }
 
 // val receiver, so here always having a val copy,
