@@ -1,0 +1,2 @@
+1. client.c
+2. server.c: fork()/dup()/pthread/signal/pipe
