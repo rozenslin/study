@@ -1,2 +1,4 @@
+TBD:
 1. client.c
 2. server.c: fork()/dup()/pthread/signal/pipe
+3. Makefile enabled: for bld on Linux and Mac

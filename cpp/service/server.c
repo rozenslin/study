@@ -236,6 +236,13 @@ void workloop(const int listen_sd, fd_set* active_fd_set, int* max_sd)
     }
 }
 
+// create a service which
+// 1. is listening on a socket,
+// 2. and can accept multi client connections simultaneously,
+// 3. and will echo back all msg from clients,
+// 4. and all ops nonblocking.
+//
+// when idle > 60s, will auto-exit.
 int main (int argc, char *argv[])
 {
     // create and setup the socket for connection
