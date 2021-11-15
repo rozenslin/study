@@ -1,5 +1,6 @@
 # study
-#Rozen's personal coding study/revision repo
+## Rozen's personal coding study/revision repo
+
 **All codes are free to use on your own risk.**
 
 Basic list:
