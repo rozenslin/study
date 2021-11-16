@@ -1,3 +1,7 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -41,7 +45,7 @@ int initsocket()
     // set socket nonblocking
     rc = fcntl(listen_sd, F_SETFL, O_NONBLOCK);
     if (rc < 0) {
-        printf("Error: fcntl() failed\n");
+        printf("ahoooooooooooooooooooo Error: fcntl() failed\n");
         close(listen_sd);
         exit(PROG_FAILURE);
     }
@@ -84,8 +88,14 @@ bool newconn(const int listen_sd, fd_set* active_fd_set, int* max_sd)
     {
         // accept new connection, if got EWOULDBLOCK, means all done
         // has to set SOCK_NONBLOCK or by fcntl, since the nonblocking not inherited from listen_sd...
+#if HAVE_ACCEPT4
         new_sd = accept4(listen_sd, (struct sockaddr *)&address, (socklen_t*)&addrlen, SOCK_NONBLOCK);
-
+#elif HAVE_ACCEPT 
+        // mac is weird, new_sd is already nonblocking now
+        new_sd = accept(listen_sd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+#else 
+#error ahoooooooooooooooooooooooooooooooooooo!
+#endif
         if (new_sd < 0) {
             if (errno != EWOULDBLOCK) {
                 printf("Error:  accept() failed\n");
