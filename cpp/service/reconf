@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+echo "- aclocal:    macros for autoconf"
+aclocal || exit $?
+echo "- autoconf:   configure.ac --> configure"
+autoconf || exit $?
+echo "- autoheader: configure.ac --> config.h.in"
+autoheader || exit $?
+echo "- automake:   Makefile.am  --> Makefile.in"
+automake -ac --foreign || exit $?
+echo "- configure:  Makefile.in --> Makefile, config.h.in --> config.h"
+./configure || exit $?
