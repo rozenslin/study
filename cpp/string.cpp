@@ -11,7 +11,7 @@ class String
 
     public:
         // def ctor
-        String(const char*, const size_t);
+        String(const char* s = NULL, const size_t max = MAX_LEN);
         // copy ctor
         String(const String &);
         // detor
@@ -29,7 +29,7 @@ class String
 };
 
 // def ctor
-String::String(const char* s = NULL, const size_t max = MAX_LEN): m_max(max)
+String::String(const char* s, const size_t max): m_max(max)
 {
     if (!s)
         m_len = 0;
