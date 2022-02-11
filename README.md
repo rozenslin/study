@@ -8,3 +8,4 @@ Basic list:
 2. cpp: C/CPP codes, specially
     - cpp/service: linux server/client codes for socket/network programming, including the autotools use.
 3. gopher: go codes
+4. algorithms: algo. playground, with codes in 2/3.
