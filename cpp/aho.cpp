@@ -1,3 +1,6 @@
+// Subject to the terms of the Mozilla Public License, v. 2.0, see https://mozilla.org/MPL/2.0/.
+// Free for non-commercial use, contact owner for commercial use.
+//
 // Aho-Corasick algo.
 // problem:
 //   given a list of patterns, P1, P2, ... Pk, total len = n
@@ -15,10 +18,15 @@
 //    or next char from T not matches current path, instead of restart from root again
 //    1.3 add the output links into each node, this is for the case of current matches means all its substring patterns
 //    also match, to save the time
+//    1.4 so these completes the 3 functions for such automaton:
+//        goto: node.child to go on traverse
+//        suffix: node.suffix to jump when current path fails/ends
+//        output: node.output to output all reached matches so far
 //
 // 2. do the search work upon such automaton.
 #include <iostream>
 #include <string>
+#include <cstdio>
 #include <map>
 #include <queue>
 using namespace std;
@@ -133,6 +141,38 @@ void suffix_n_output(Node* root)
     }
 }
 
+// dump the trie
+void bfs_dump(Node* root) {
+    Node* x = root;
+    queue<Node*> q;
+    int i = 1;
+
+    // root
+    printf("Node %2d:    root: %p, \tsuffix: %p, \tindex: %d, \toutput: %p\n", i, x, x->suffix, x->index, x->output);
+    printf("\t\t\tchild:");
+    for (const auto& [k, v] : root->child) {
+        printf("(%c,  %p), ", k, v);
+        q.push(v);
+    }
+    printf("\n");
+    i++;
+
+    while (q.size()) {
+        Node* x = q.front();
+        q.pop();
+
+        printf("Node %2d:    node: %p, \tsuffix: %p, \tindex: %d, \toutput: %p\n", i, x, x->suffix, x->index, x->output);
+        printf("\t\t\tchild:");
+        for (const auto& [k, v] : x->child)
+        {
+            printf("(%c,  %p), ", k, v);
+            q.push(v);
+        }
+        printf("\n");
+        i++;
+    }
+}
+
 // time: (m + z), z is number of matches
 void search_matches(Node* root, string& text, map<char, vector<int> >& result)
 {
@@ -189,6 +229,8 @@ int main()
     Node* root = build_trie(patterns);
 
     suffix_n_output(root);
+
+    bfs_dump(root);
 
     // element as (char, list of pos matched)
     map<char, vector<int> > result;
