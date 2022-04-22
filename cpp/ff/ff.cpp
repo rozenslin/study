@@ -38,8 +38,9 @@
  * 4.1 using pthread to create the threads for each task
  * 4.2 using mutext to protect the gResult, shared and modified by all thread, to avoid race
  * 4.3 main proc will join and wait for each thread to finish
- * 4.4 upon external signal (stop or kill), main proc shall kill all threads too
- * 5. main prog input and singal handling...
+ * 4.4 TODO upon external signal (stop or kill), main proc shall kill all threads too
+ * 4.5 TODO another thread to call DumpResult periodically
+ * 5. TODO main proc input and singal handling...
  *
  */
 
@@ -176,7 +177,7 @@ void GetAllFiles(string& path, const string name)
     {
         if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
         {
-            // Construct new path from our base path
+            // construct new path from our base path
             string newpath = path + "/" + dp->d_name;
 
             GetAllFiles(newpath, dp->d_name);
@@ -229,15 +230,7 @@ void DumpResult()
     }
 }
 
-typedef struct 
-{
-    pthread_t thread_id;       /* ID returned by pthread_create() */
-    int       thread_num;      /* Application-defined thread # */
-    string    substring;       /* substring for search */
-} ThreadInfo;
-
-static pthread_mutex_t gMutex = PTHREAD_MUTEX_INITIALIZER;
-
+// KMP codes
 int* KMP_BuildLps(const string pattern) 
 {
     int n = pattern.length();
@@ -299,6 +292,21 @@ bool StrMatch(const string text, const string pattern)
     return ret;
 }
 
+// thread codes
+
+// threadinfo passed from proc into threads
+typedef struct 
+{
+    // id from pthread_create()
+    pthread_t thread_id;
+    // local defined thread number
+    int       thread_num;
+    // substring for search
+    string    substring;
+} ThreadInfo;
+
+static pthread_mutex_t gMutex = PTHREAD_MUTEX_INITIALIZER;
+
 // worker thread for real search task
 void* DoSearchTask(void *arg) 
 {
@@ -309,17 +317,21 @@ void* DoSearchTask(void *arg)
    {
        if (StrMatch(key, substr))
        {
-           // only acquire lock when needs update the gResult.
-           pthread_mutex_lock(&gMutex);
-           cout << "In thread: " << tinfo->thread_num << " for substring: " << substr << ", updating gResult" << endl;
            if (!gResult.count(key)) 
            {
                // only set if not already found by other threads
-               gResult[key] = &gFileDB[key];
-           }
+               
+               // only acquire lock when needs update the gResult.
+               pthread_mutex_lock(&gMutex);
 
-           cout << "In thread: " << tinfo->thread_num << "for substring: " << substr << ", updated gResult, now size: " << gResult.size() << endl;
-           pthread_mutex_unlock(&gMutex);
+               cout << "In thread: " << tinfo->thread_num << " for substring: " << substr << ", updating gResult" << endl;
+
+               gResult[key] = &gFileDB[key];
+
+               cout << "In thread: " << tinfo->thread_num << "for substring: " << substr << ", updated gResult, now size: " << gResult.size() << endl;
+
+               pthread_mutex_unlock(&gMutex);
+           }
        }
    }
 
@@ -340,7 +352,7 @@ void DoWork()
 
     num_threads = gOpt.m_filenames.size();
 
-    /* Initialize thread creation attributes */
+    // init thread creation attributes 
     rc = pthread_attr_init(&attr);
     if (rc != 0)
     {
@@ -358,13 +370,10 @@ void DoWork()
 
     ThreadInfo *tinfo = new ThreadInfo[num_threads];
 
-    /* Create one thread for each command-line argument */
+    // one thread for each search substring
     for (int i = 0; i < num_threads; i++) {
         tinfo[i].thread_num = i + 1;
         tinfo[i].substring = gOpt.m_filenames[i];
-
-        /* The pthread_create() call stores the thread ID into
-           corresponding element of tinfo[] */
 
         rc = pthread_create(&tinfo[i].thread_id,
                             &attr,
@@ -379,7 +388,8 @@ void DoWork()
 
     pthread_attr_destroy(&attr);
 
-    /* Now join with each thread, and display its returned value */
+    // now join with each thread
+    // XXX not recall clearly, here shall handle waiting?
     for (int i = 0; i < num_threads; i++)
     {
         rc = pthread_join(tinfo[i].thread_id, &res);
