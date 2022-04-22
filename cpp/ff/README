@@ -14,6 +14,7 @@ Completed list from ff.cpp:
 TODO list to complete feature:
     0. work time estimated: 1 day coding + 3 days testing
     1. main proc starts another thread to periodically call DumpResult()
+    1.1 may consider more cases about thread issues in DoSearchTask()...
     2. main proc accept the cmdline instructions and singals
     3. another test prog as well as the test plan
     3.1 basically two parts, the real data test (aka use local real dir for testing)
