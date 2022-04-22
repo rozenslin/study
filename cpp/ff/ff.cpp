@@ -80,7 +80,7 @@ options:\n \
 map<string, vector<string> > gFileDB;
 
 // XXX this gResult will be protected by gMutex for multi-thread access
-map<string, vector<string>* > gResult;
+map<string, bool> gResult;
 
 class Options
 {
@@ -223,7 +223,7 @@ void DumpResult()
     for (const auto& [key, value] : gResult)
     {
         cout << "name: " << key << ", paths:" << endl;
-        for (const auto& path : *value)
+        for (const auto& path : gFileDB[key])
         {
             cout << "\t" << path << endl;
         }
@@ -317,21 +317,19 @@ void* DoSearchTask(void *arg)
    {
        if (StrMatch(key, substr))
        {
+           // only acquire lock when needs update the gResult.
+           pthread_mutex_lock(&gMutex);
+           cout << "In thread: " << tinfo->thread_num << " for substring: " << substr << ", updating gResult" << endl;
+
+           // only set if not already found by other threads
            if (!gResult.count(key)) 
            {
-               // only set if not already found by other threads
-               
-               // only acquire lock when needs update the gResult.
-               pthread_mutex_lock(&gMutex);
-
-               cout << "In thread: " << tinfo->thread_num << " for substring: " << substr << ", updating gResult" << endl;
-
-               gResult[key] = &gFileDB[key];
-
-               cout << "In thread: " << tinfo->thread_num << "for substring: " << substr << ", updated gResult, now size: " << gResult.size() << endl;
-
-               pthread_mutex_unlock(&gMutex);
+               gResult[key] = true;
            }
+
+           cout << "In thread: " << tinfo->thread_num << "for substring: " << substr << ", updated gResult, now size: " << gResult.size() << endl;
+           pthread_mutex_unlock(&gMutex);
+
        }
    }
 
