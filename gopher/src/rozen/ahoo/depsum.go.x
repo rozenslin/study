@@ -8,11 +8,11 @@ func get_depsum(item interface{}, sum *int, depth int) {
         // got the number, calc and sum up
         *sum += depth * item.(int)
 
-    case ItemArray:
+    case []interface{}:
         // got the array, increase the depth and go into array
         depth++
 
-        s := item.(ItemArray)
+        s := item.([]interface{})
         for _, v := range s {
             get_depsum(v, sum, depth)
         }
@@ -24,12 +24,12 @@ func get_depsum(item interface{}, sum *int, depth int) {
 
 func main() {
     // using interface{} as auto type
-    arr := ItemArray {
+    arr := []interface{} {
         1,
-        ItemArray {2, 4},
-        ItemArray {
+        []interface{} {2, 4},
+        []interface{} {
             3,
-            ItemArray {5},
+            []interface{} {5},
         },
     }
 
